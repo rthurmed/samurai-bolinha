@@ -83,17 +83,34 @@ k.scene("swipe-particles", () => {
 
     // TODO: draw only after ball is destroyed
     // TODO: draw each side separately after the cut
+    const cutPercent = .35;
+    const cutHeight = BEAN_HEIGHT * cutPercent;
+
     k.drawSubtracted(() => {
       k.drawSprite({
         sprite: "bean",
-        pos: k.center().add(k.vec2(-BEAN_WIDTH/2, -BEAN_HEIGHT/2)),
         color: k.RED,
+        pos: k.center().add(k.vec2(-BEAN_WIDTH/2, -BEAN_HEIGHT/2)),
       });
     }, () => {
       k.drawRect({
         width: BEAN_WIDTH,
-        height: BEAN_HEIGHT - 30,
+        height: cutHeight,
         pos: k.center().add(k.vec2(-BEAN_WIDTH/2, -BEAN_HEIGHT/2)),
+      });
+    });
+
+    k.drawSubtracted(() => {
+      k.drawSprite({
+        sprite: "bean",
+        color: k.GREEN,
+        pos: k.center().add(k.vec2(-BEAN_WIDTH/2, -BEAN_HEIGHT/2)),
+      });
+    }, () => {
+      k.drawRect({
+        width: BEAN_WIDTH,
+        height: BEAN_HEIGHT - cutHeight,
+        pos: k.center().add(k.vec2(-BEAN_WIDTH/2, -BEAN_HEIGHT/2 + cutHeight)),
       });
     });
   });
