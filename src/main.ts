@@ -2,6 +2,7 @@ import kaboom, { AreaComp, GameObj, PosComp } from "kaboom";
 
 const BEAN_WIDTH = 61;
 const BEAN_HEIGHT = 53;
+const BEAN_COLLISION_PADDING = 4;
 const ATTACK_RAY_LENGTH = 16;
 
 const k = kaboom({
@@ -57,20 +58,6 @@ k.scene("swipe-particles", () => {
     });
   });
 
-  const entity = game.add([
-    "ball",
-    k.anchor("center"),
-    k.area({
-      shape: new k.Rect(k.vec2(), BEAN_WIDTH, BEAN_HEIGHT)
-    }),
-    k.body({
-      isStatic: true
-    }),
-    k.pos(k.center()),
-    k.offscreen({ destroy: true }),
-    // k.sprite("bean"),
-  ]);
-
   game.onDraw(() => {
     if (k.debug.inspect) {
       k.drawLine({
@@ -115,12 +102,30 @@ k.scene("swipe-particles", () => {
     });
   });
 
-  // game.loop(1, () => {
-  //   // 
-  //   const offset = k.vec2(k.randi(-100, 100), k.randi(-100, 100));
-  //   entity.pos = entity.pos.add(offset);
-  //   entity.jump();
-  // });
+  game.loop(.75, () => {
+    const entity = game.add([
+      "ball",
+      k.anchor("center"),
+      k.area({
+        shape: new k.Rect(
+          k.vec2(),
+          BEAN_WIDTH + (BEAN_COLLISION_PADDING * 2),
+          BEAN_HEIGHT + (BEAN_COLLISION_PADDING * 2)
+        ),
+        collisionIgnore: ["ball"]
+      }),
+      k.body({
+        // isStatic: true
+      }),
+      k.pos(k.center()),
+      k.offscreen({ destroy: true }),
+      k.sprite("bean"),
+    ]);
+
+    const offset = k.vec2(k.randi(-200, 200), k.randi(-200, 200));
+    entity.pos = entity.pos.add(offset);
+    entity.jump();
+  });
 });
 
 k.go("swipe-particles");
