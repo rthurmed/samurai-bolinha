@@ -11,7 +11,7 @@ const BALL_WIDTH = 32;
 const BALL_HEIGHT = 32;
 const BALL_COLLISION_PADDING = 4;
 const SPAWN_SIZE = 100;
-const ATTACK_LENGTH = 32;
+const ATTACK_LENGTH = 16;
 const ATTACK_LENGTH_MOUSE = 4;
 const ATTACK_MARKER_SIZE = 12;
 
@@ -67,7 +67,17 @@ k.scene("swipe-particles", () => {
     
     for (let i = 0; i < balls.length; i++) {
       const ball = balls[i] as GameObj<SpriteComp | AreaComp | PosComp>;
-      const rect = new k.Rect(ball.pos, ball.width, ball.height)
+      const shapeRect = ball.area.shape as Rect;
+      const rect = new k.Rect(
+        ball.pos.add(k.vec2(-shapeRect.width/2, -shapeRect.height/2)), // centralized
+        shapeRect.width,
+        shapeRect.height
+      );
+      
+      if (k.debug.inspect) {
+        k.drawRect({ ...rect });
+      }
+
       const collides = k.testRectLine(rect, line);
       if (collides) {
         ball.destroy();
