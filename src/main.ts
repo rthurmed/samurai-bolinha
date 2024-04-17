@@ -1,8 +1,12 @@
 import kaboom, { AreaComp, GameObj, PosComp, Rect, SpriteComp, Vec2 } from "kaboom";
 
 const DEBUG = false;
-const GAME_SCALE = 5;
 const GAME_GRAVITY = 400;
+const GAME_WIDTH = 176;
+const GAME_HEIGHT = 240;
+const GAME_SCALE = window.innerWidth < window.innerHeight
+  ? window.innerWidth / GAME_WIDTH
+  : window.innerHeight / GAME_HEIGHT;
 const BALL_WIDTH = 32;
 const BALL_HEIGHT = 32;
 const BALL_COLLISION_PADDING = 4;
@@ -15,6 +19,8 @@ const k = kaboom({
   canvas: document.getElementById('canvas') as HTMLCanvasElement,
   touchToMouse: false,
   scale: GAME_SCALE,
+  width: GAME_WIDTH,
+  height: GAME_HEIGHT,
   debug: DEBUG,
 });
 
