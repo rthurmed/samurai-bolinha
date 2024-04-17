@@ -1,21 +1,25 @@
-import kaboom, { AreaComp, GameObj, PosComp, Rect, SpriteComp } from "kaboom";
+import kaboom, { AreaComp, GameObj, PosComp, Rect, SpriteComp, Vec2 } from "kaboom";
 
+const DEBUG = false;
 const GAME_SCALE = 5;
 const GAME_GRAVITY = 400;
 const BALL_WIDTH = 32;
 const BALL_HEIGHT = 32;
 const BALL_COLLISION_PADDING = 4;
 const SPAWN_SIZE = 100;
-const ATTACK_RAY_LENGTH = 32;
-const ATTACK_MARKER_SIZE = 16;
+const ATTACK_LENGTH = 32;
+const ATTACK_LENGTH_MOUSE = 4;
+const ATTACK_MARKER_SIZE = 12;
 
 const k = kaboom({
   canvas: document.getElementById('canvas') as HTMLCanvasElement,
+  touchToMouse: false,
   scale: GAME_SCALE,
-  debug: false
+  debug: DEBUG,
 });
 
-k.debug.inspect = false;
+k.debug.inspect = DEBUG;
+k.setBackground(k.Color.fromHex("#17111a"));
 
 k.loadSprite("bean", "./sprites/bean.png");
 k.loadSprite("ball", "./sprites/ball.png");
@@ -23,28 +27,36 @@ k.loadSprite("samurai", "./sprites/samurai.png");
 
 k.scene("swipe-particles", () => {
   k.setGravity(GAME_GRAVITY);
-  k.setBackground(k.Color.fromHex("#ffbf36"));
 
   const game = k.add([
     k.timer()
   ]);
 
+  if (!k.debug.inspect) {
+    const background = game.add([
+      k.rect(k.width(), k.height()),
+      k.pos(),
+      k.color(k.Color.fromHex("#ffbf36")),
+      k.z(-10),
+    ]);
+  }
+
   const avatar = game.add([
     k.sprite("samurai"),
     k.anchor("botleft"),
     k.pos(0, k.height() + 8)
-  ])
+  ]);
 
   let lastPos = k.vec2();
   let direction = k.vec2();
 
-  game.onTouchMove((pos, touch) => {
+  const handleMove = (pos: Vec2, attackSize: number) => {
     const scaledPos = pos.scale(1/GAME_SCALE);
     direction = k.Vec2.fromAngle(scaledPos.angle(lastPos));
     lastPos = scaledPos;
 
     // physics
-    const line = new k.Line(lastPos, lastPos.add(direction.scale(ATTACK_RAY_LENGTH)));
+    const line = new k.Line(lastPos, lastPos.add(direction.scale(attackSize)));
     const balls = game.get("ball");
     
     for (let i = 0; i < balls.length; i++) {
@@ -70,13 +82,23 @@ k.scene("swipe-particles", () => {
     marker.onUpdate(() => {
       marker.scale = marker.scale.scale(1 - k.dt() * 4);
     });
+  }
+
+  game.onTouchMove((pos, touch) => {
+    handleMove(pos, ATTACK_LENGTH);
+  });
+
+  game.onMouseMove((pos, delta) => {
+    if (k.isMouseDown("left")) {
+      handleMove(pos, ATTACK_LENGTH_MOUSE);
+    }
   });
 
   game.onDraw(() => {
     if (k.debug.inspect) {
       k.drawLine({
         p1: lastPos,
-        p2: lastPos.add(direction.scale(ATTACK_RAY_LENGTH)),
+        p2: lastPos.add(direction.scale(ATTACK_LENGTH)),
         color: k.RED,
         width: 4,
       });
