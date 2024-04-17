@@ -1,7 +1,7 @@
 import kaboom, { AreaComp, GameObj, PosComp, Rect, SpriteComp } from "kaboom";
 
 const GAME_SCALE = 5;
-const GAME_GRAVITY = 1000;
+const GAME_GRAVITY = 400;
 const BALL_WIDTH = 32;
 const BALL_HEIGHT = 32;
 const BALL_COLLISION_PADDING = 4;
@@ -130,7 +130,10 @@ k.scene("swipe-particles", () => {
         ),
         collisionIgnore: ["ball"]
       }),
-      k.body({ isStatic }),
+      k.body({
+        isStatic,
+        jumpForce: 200
+      }),
       k.color(k.choose([
         k.Color.fromHex("#83e04c"),
         k.Color.fromHex("#3898ff"),
