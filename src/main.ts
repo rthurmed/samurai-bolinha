@@ -31,6 +31,9 @@ k.loadSprite("bean", "./sprites/bean.png");
 k.loadSprite("ball", "./sprites/ball.png");
 k.loadSprite("samurai", "./sprites/samurai.png");
 
+k.loadSound("hit", "./sounds/hit.wav");
+k.loadSound("explosion", "./sounds/explosion.wav");
+
 k.scene("swipe-particles", () => {
   k.setGravity(GAME_GRAVITY);
 
@@ -81,6 +84,9 @@ k.scene("swipe-particles", () => {
       const collides = k.testRectLine(rect, line);
       if (collides) {
         ball.destroy();
+        k.play("hit", {
+          detune: k.randi(0, 12) * 100
+        });
         k.addKaboom(lastPos, {
           scale: 1/(GAME_SCALE - 2)
         });
@@ -157,7 +163,7 @@ k.scene("swipe-particles", () => {
   const createBall = ({
     isStatic = false
   } = {}) => {
-    return game.add([
+    const ball = game.add([
       "ball",
       k.anchor("center"),
       k.area({
@@ -184,6 +190,13 @@ k.scene("swipe-particles", () => {
       k.offscreen({ destroy: true }),
       k.sprite("ball"),
     ]);
+    ball.onExitScreen(() => {
+      k.play("explosion", {
+        volume: .3,
+        detune: k.randi(0, 12) * 100
+      });
+    });
+    return ball;
   }
 
   // const ball = createBall({ isStatic: true });
