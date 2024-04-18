@@ -185,6 +185,8 @@ k.scene("swipe-particles", () => {
     ]);
 
     // decorations
+    // TODO: replace with SVG image
+
     const color = k.choose([
       k.Color.fromHex("#83e04c"),
       k.Color.fromHex("#3898ff"),
@@ -202,6 +204,19 @@ k.scene("swipe-particles", () => {
       k.color(color.darken(50)),
       k.circle(BALL_DIAMETER/2+BALL_BORDER_SIZE),
       k.z(99)
+    ]);
+    const glowColor = color.lighten(50);
+    const glow = ball.add([
+      k.color(glowColor),
+      k.circle(BALL_DIAMETER / 8),
+      k.z(101),
+      k.pos(k.vec2(1, -1).scale(BALL_DIAMETER / 2 * .4)),
+    ]);
+    const glow2 = ball.add([
+      k.color(glowColor),
+      k.circle(BALL_DIAMETER / 12),
+      k.z(101),
+      k.pos(k.vec2(1.5, -.1).scale(BALL_DIAMETER / 2 * .4)),
     ]);
 
     ball.onExitScreen(() => {
