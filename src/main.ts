@@ -7,9 +7,9 @@ const GAME_HEIGHT = 240;
 const GAME_SCALE = window.innerWidth < window.innerHeight
   ? window.innerWidth / GAME_WIDTH
   : window.innerHeight / GAME_HEIGHT;
-const BALL_WIDTH = 32;
-const BALL_HEIGHT = 32;
-const BALL_COLLISION_PADDING = 4;
+const BALL_DIAMETER = 32;
+const BALL_BORDER_SIZE = 1;
+const BALL_COLLISION_PADDING = 2;
 const SPAWN_SIZE = 100;
 const ATTACK_LENGTH = 16;
 const ATTACK_LENGTH_MOUSE = 4;
@@ -63,6 +63,9 @@ k.scene("swipe-particles", () => {
     const scaledPos = pos.scale(1/GAME_SCALE);
     direction = k.Vec2.fromAngle(scaledPos.angle(lastPos));
     lastPos = scaledPos;
+    
+    // // for tests:
+    // direction = k.DOWN;
 
     // physics
     const line = new k.Line(lastPos, lastPos.add(direction.scale(attackSize)));
@@ -70,18 +73,21 @@ k.scene("swipe-particles", () => {
     
     for (let i = 0; i < balls.length; i++) {
       const ball = balls[i] as GameObj<SpriteComp | AreaComp | PosComp>;
-      const shapeRect = ball.area.shape as Rect;
-      const rect = new k.Rect(
-        ball.pos.add(k.vec2(-shapeRect.width/2, -shapeRect.height/2)), // centralized
-        shapeRect.width,
-        shapeRect.height
+
+      const radius = BALL_DIAMETER / 2 + BALL_COLLISION_PADDING;
+      const circle = new k.Circle(
+        ball.pos,
+        radius,
       );
       
       if (k.debug.inspect) {
-        k.drawRect({ ...rect });
+        k.drawCircle({
+          pos: circle.center,
+          radius: circle.radius
+        });
       }
 
-      const collides = k.testRectLine(rect, line);
+      const collides = k.testLineCircle(line, circle);
       if (collides) {
         ball.destroy();
         k.play("hit", {
@@ -167,35 +173,44 @@ k.scene("swipe-particles", () => {
       "ball",
       k.anchor("center"),
       k.area({
-        shape: new k.Rect(
-          k.vec2(),
-          BALL_WIDTH + (BALL_COLLISION_PADDING * 2),
-          BALL_HEIGHT + (BALL_COLLISION_PADDING * 2)
-        ),
+        shape: new k.Rect(k.vec2(), BALL_DIAMETER, BALL_DIAMETER),
         collisionIgnore: ["ball"]
       }),
       k.body({
         isStatic,
         jumpForce: 200
       }),
-      k.color(k.choose([
-        k.Color.fromHex("#83e04c"),
-        k.Color.fromHex("#3898ff"),
-        k.Color.fromHex("#bf3fb3"),
-        k.Color.fromHex("#682b82"),
-        k.Color.fromHex("#e14141"),
-        k.Color.fromHex("#ff80aa"),
-      ])),
       k.pos(k.center()),
-      k.offscreen({ destroy: true }),
-      k.sprite("ball"),
+      k.offscreen({ destroy: true })
     ]);
+
+    // decorations
+    const color = k.choose([
+      k.Color.fromHex("#83e04c"),
+      k.Color.fromHex("#3898ff"),
+      k.Color.fromHex("#bf3fb3"),
+      k.Color.fromHex("#682b82"),
+      k.Color.fromHex("#e14141"),
+      k.Color.fromHex("#ff80aa"),
+    ]);
+    const content = ball.add([
+      k.color(color),
+      k.circle(BALL_DIAMETER/2),
+      k.z(100)
+    ]);
+    const border = ball.add([
+      k.color(color.darken(50)),
+      k.circle(BALL_DIAMETER/2+BALL_BORDER_SIZE),
+      k.z(99)
+    ]);
+
     ball.onExitScreen(() => {
       k.play("explosion", {
         volume: .3,
         detune: k.randi(0, 12) * 100
       });
     });
+
     return ball;
   }
 
@@ -204,7 +219,7 @@ k.scene("swipe-particles", () => {
   game.loop(.75, () => {
     const ball = createBall();
     ball.pos = k.vec2(
-      k.randi(BALL_WIDTH, k.width() - BALL_WIDTH),
+      k.randi(BALL_DIAMETER, k.width() - BALL_DIAMETER),
       k.height() / 2 + k.randi(-SPAWN_SIZE, SPAWN_SIZE)
     );
     ball.jump();
